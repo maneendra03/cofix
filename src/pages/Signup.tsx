@@ -13,11 +13,6 @@ export default function Signup() {
     confirmPassword: '',
   });
 
-<<<<<<< HEAD
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Add signup logic here
-=======
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Add signup logic here
@@ -62,7 +57,6 @@ export default function Signup() {
       console.error("Error:", error);
       alert("Sign-up failed");
     }
->>>>>>> dbab9e4 (Initial commit)
   };
 
   return (
@@ -70,11 +64,7 @@ export default function Signup() {
       title="Create an account"
       subtitle="Join our community to start reporting issues"
     >
-<<<<<<< HEAD
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-=======
       <form className="mt-8 space-y-6" onSubmit={()=>handleSubmit}>
->>>>>>> dbab9e4 (Initial commit)
         <div className="space-y-4">
           <Input
             label="Full name"
@@ -117,11 +107,7 @@ export default function Signup() {
         <div className="text-center">
           <span className="text-sm text-gray-600">
             Already have an account?{' '}
-<<<<<<< HEAD
-            <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-=======
             <Link to="/home" className="font-medium text-indigo-600 hover:text-indigo-500">
->>>>>>> dbab9e4 (Initial commit)
               Sign in
             </Link>
           </span>

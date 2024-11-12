@@ -37,11 +37,7 @@ export default function IssueMap({ issues }: IssueMapProps) {
 
   return (
     <MapContainer
-<<<<<<< HEAD
-      center={[17.45563956150916, 78.66645358023057]}
-=======
       center={[17.6051537, 78.4857042]}
->>>>>>> dbab9e4 (Initial commit)
       zoom={13}
       className="h-full w-full"
     >
@@ -49,7 +45,7 @@ export default function IssueMap({ issues }: IssueMapProps) {
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {issues.map((issue) => (
+      {issues.map((issue) => ( 
         <Marker
           key={issue.id}
           position={[issue.location.lat, issue.location.lng]}
