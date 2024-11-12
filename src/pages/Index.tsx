@@ -14,7 +14,7 @@ const mockIssues = [
     type: 'community',
     status: 'pending',
     urgency: 'medium',
-    location: { lat: 37.7749, lng: -122.4194 },
+    location: { lat: 17.6051537, lng: 78.4857042 },
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: '1'
@@ -26,7 +26,7 @@ const mockIssues = [
     type: 'community',
     status: 'solved',
     urgency: 'high',
-    location: { lat: 37.7858, lng: -122.4064 },
+    location: { lat:  17.6060034, lng:78.4890395 },
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: '2'

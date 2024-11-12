@@ -15,7 +15,7 @@ const mockIssues: Issue[] = [
     type: 'community',
     status: 'pending',
     urgency: 'medium',
-    location: { lat: 37.7749, lng: -122.4194 },
+    location: { lat: 17.6051, lng: 78.4857 },
     createdAt: new Date(),
     updatedAt: new Date(),
     userId: '1',

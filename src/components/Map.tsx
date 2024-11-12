@@ -37,7 +37,11 @@ export default function IssueMap({ issues }: IssueMapProps) {
 
   return (
     <MapContainer
+<<<<<<< HEAD
       center={[17.45563956150916, 78.66645358023057]}
+=======
+      center={[17.6051537, 78.4857042]}
+>>>>>>> dbab9e4 (Initial commit)
       zoom={13}
       className="h-full w-full"
     >

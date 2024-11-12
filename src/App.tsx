@@ -9,6 +9,10 @@ import CommunityIssues from './pages/CommunityIssues';
 import GovernmentSchemes from './pages/GovernmentSchemes';
 import Notices from './pages/Notices';
 import Profile from './pages/Profile';
+<<<<<<< HEAD
+=======
+import Map from 'react-map-gl/dist/esm/components/map';
+>>>>>>> dbab9e4 (Initial commit)
 // import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
@@ -22,6 +26,10 @@ function App() {
         
         {/* Protected routes */}
         <Route path="/home" element={<Home />} />
+<<<<<<< HEAD
+=======
+        <Route path="/map" element={<Map />} />
+>>>>>>> dbab9e4 (Initial commit)
         <Route path="/issues" element={<CommunityIssues />} />
         <Route path="/schemes" element={<GovernmentSchemes />} />
         <Route path="/notices" element={<Notices />} />

@@ -13,9 +13,56 @@ export default function Signup() {
     confirmPassword: '',
   });
 
+<<<<<<< HEAD
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Add signup logic here
+=======
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // Add signup logic here
+    // const form = e.target as HTMLFormElement;
+    // const formData = new FormData(form);
+
+    // // Using type assertions to ensure values are strings
+    // const name = formData.get("fullName") as string;
+    // const email = formData.get("email") as string;
+    // const password = formData.get("password") as string;
+    // const confirmPassword = formData.get("confirmPassword") as string;
+    // console.log('name=', name, 'pass:', password, 'email:', email);
+    // // Check for null values before making the request
+    // if (!name || !email || !password || !(password === confirmPassword)) {
+    //   alert("Please fill out all fields.");
+    //   return;
+    // }
+    console.log('Form Submitted!');
+    console.log('Email:', formData.email);
+    console.log('Password:', formData.password);
+    alert('pause');
+    try {
+      const response = await fetch("http://localhost:8000/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          name: 'name',
+          email: 'email',
+          password: 'rahul',
+        }),
+      });
+
+      if (response.ok) {
+        alert("Sign-up successful");
+        window.location.href = 'index';
+      } else {
+        alert("Sign-up failed");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Sign-up failed");
+    }
+>>>>>>> dbab9e4 (Initial commit)
   };
 
   return (
@@ -23,7 +70,11 @@ export default function Signup() {
       title="Create an account"
       subtitle="Join our community to start reporting issues"
     >
+<<<<<<< HEAD
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+=======
+      <form className="mt-8 space-y-6" onSubmit={()=>handleSubmit}>
+>>>>>>> dbab9e4 (Initial commit)
         <div className="space-y-4">
           <Input
             label="Full name"
@@ -66,7 +117,11 @@ export default function Signup() {
         <div className="text-center">
           <span className="text-sm text-gray-600">
             Already have an account?{' '}
+<<<<<<< HEAD
             <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+=======
+            <Link to="/home" className="font-medium text-indigo-600 hover:text-indigo-500">
+>>>>>>> dbab9e4 (Initial commit)
               Sign in
             </Link>
           </span>

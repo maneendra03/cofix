@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MapPin, Home, AlertCircle, Bell, User, Settings, LogOut } from 'lucide-react';
+=======
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { MapPin, Home, AlertCircle, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
+>>>>>>> dbab9e4 (Initial commit)
 import Footer from './Footer';
 
 interface DashboardLayoutProps {
@@ -9,6 +15,10 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
+<<<<<<< HEAD
+=======
+  const [sidebarOpen, setSidebarOpen] = useState(false); // State to control sidebar visibility on mobile
+>>>>>>> dbab9e4 (Initial commit)
 
   const navigation = [
     { name: 'Home', href: '/home', icon: Home },
@@ -19,8 +29,28 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
+<<<<<<< HEAD
       {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 w-64 bg-white border-r">
+=======
+      {/* Mobile Header */}
+      <div className="flex items-center h-16 px-4 bg-white border-b md:hidden">
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-gray-600 focus:outline-none">
+          <Menu className="h-6 w-6" />
+        </button>
+        <Link to="/" className="ml-4 flex items-center space-x-2">
+          <MapPin className="h-8 w-8 text-indigo-600" />
+          <span className="text-xl font-bold">Communitifx</span>
+        </Link>
+      </div>
+
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 w-64 bg-white border-r transform ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 transition-transform duration-300 ease-in-out z-50 md:z-auto`}
+      >
+>>>>>>> dbab9e4 (Initial commit)
         <div className="flex items-center h-16 px-4 border-b">
           <Link to="/" className="flex items-center space-x-2">
             <MapPin className="h-8 w-8 text-indigo-600" />
@@ -55,7 +85,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             Settings
           </Link>
           <button
+<<<<<<< HEAD
             onClick={() => {/* Add logout logic */}}
+=======
+            onClick={() => {
+              /* Add logout logic */
+            }}
+>>>>>>> dbab9e4 (Initial commit)
             className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md"
           >
             <LogOut className="mr-3 h-5 w-5" />
@@ -65,7 +101,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
 
       {/* Main content */}
+<<<<<<< HEAD
       <div className="pl-64 flex flex-col flex-grow">
+=======
+      <div className="md:pl-64 flex flex-col flex-grow">
+>>>>>>> dbab9e4 (Initial commit)
         <main className="flex-grow py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {children}
@@ -75,4 +115,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       </div>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> dbab9e4 (Initial commit)
