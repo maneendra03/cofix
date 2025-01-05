@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useRef, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Users, Shield, ArrowRight, Github, Mail } from 'lucide-react';
 import IssueMap from '../components/Map';
@@ -52,16 +52,99 @@ const features = [
 ];
 
 export default function Index() {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
+  const [allIssues, setAllIssues] = useState([]);
+
+  useEffect(() => {
+    // Check authentication status when component mounts
+    const email = localStorage.getItem('userEmail');
+    if (email) {
+      checkAuthStatus(email);
+    }
+
+    // Fetch all issues when component mounts
+    const fetchIssues = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/api/issues/all');
+        if (response.ok) {
+          const data = await response.json();
+          setAllIssues(data);
+        }
+      } catch (error) {
+        console.error('Error fetching issues:', error);
+      }
+    };
+
+    fetchIssues();
+  }, []);
+
+  const checkAuthStatus = async (email: string) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/auth/status?email=${email}`);
+      const data = await response.json();
+      
+      setIsAuthenticated(data.isAuthenticated);
+      if (data.isAuthenticated) {
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Error checking auth status:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    const email = localStorage.getItem('userEmail');
+    try {
+      await fetch(`http://localhost:8080/api/logout?email=${email}`, {
+        method: 'POST'
+      });
+      localStorage.removeItem('userEmail');
+      setIsAuthenticated(false);
+      setUser(null);
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const handleCommunityIssuesClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/home');
+    } else {
+      navigate('/home');
+    }
+  };
+
   const mapRef = useRef<HTMLDivElement>(null);
 
   const scrollToMap = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent any default navigation
+    e.preventDefault();
     mapRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar>
+        {isAuthenticated ? (
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard" className="text-gray-700 hover:text-gray-900">
+              Dashboard
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-red-600 hover:text-red-800"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link to="/login" className="text-indigo-600 hover:text-indigo-800">
+            Login
+          </Link>
+        )}
+      </Navbar>
       <div className="pt-16">
         {/* Hero Section */}
         <motion.div 
@@ -95,7 +178,7 @@ export default function Index() {
                         onClick={scrollToMap}
                         className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10"
                       >
-                        View Issues Map
+                        View Maps
                         <MapPin className="ml-2 h-5 w-5" />
                       </button>
                     </div>
@@ -141,7 +224,7 @@ export default function Index() {
         </div>
 
         {/* Map Section with heading */}
-        <div className="bg-white py-12">
+        <div ref={mapRef} className="bg-white py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
@@ -152,7 +235,7 @@ export default function Index() {
               </p>
             </div>
             <div ref={mapRef} className="h-[500px] w-full rounded-lg overflow-hidden shadow-lg">
-              <IssueMap issues={mockIssues} />
+              <IssueMap issues={allIssues} />
             </div>
           </div>
         </div>

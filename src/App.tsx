@@ -9,9 +9,8 @@ import CommunityIssues from './pages/CommunityIssues';
 import GovernmentSchemes from './pages/GovernmentSchemes';
 import Notices from './pages/Notices';
 import Profile from './pages/Profile';
-import Map from 'react-map-gl/dist/esm/components/map';
 import Maps from './pages/Maps';
-// import AdminDashboard from './pages/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -21,14 +20,43 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/home" element={<Home />} />
-        
+
         {/* Protected routes */}
-        <Route path="/maps" element={<Maps />} />
-        <Route path="/issues" element={<CommunityIssues />} />
-        <Route path="/schemes" element={<GovernmentSchemes />} />
-        <Route path="/notices" element={<Notices />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        } />
+        <Route path="/notices" element={
+          <ProtectedRoute>
+            <Notices />
+          </ProtectedRoute>
+        } />
+        <Route path="/maps" element={
+          <ProtectedRoute>
+            <Maps />
+          </ProtectedRoute>
+        } />
+        <Route path="/issues" element={
+          <ProtectedRoute>
+            <CommunityIssues />
+          </ProtectedRoute>
+        } />
+        <Route path="/schemes" element={
+          <ProtectedRoute>
+            <GovernmentSchemes />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
       </Routes>
     </Router>
   );

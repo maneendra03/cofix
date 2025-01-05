@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapPin, Home, AlertCircle, Bell, User, Settings, LogOut, Menu, Map } from 'lucide-react';
 import Footer from './Footer';
 
@@ -10,6 +10,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false); // State to control sidebar visibility on mobile
+  const navigate = useNavigate();
 
   const navigation = [
     { name: 'Home', href: '/home', icon: Home },
@@ -18,6 +19,39 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Notices', href: '/notices', icon: Bell },
     { name: 'Profile', href: '/profile', icon: User },
   ];
+
+  const handleLogout = async () => {
+    const email = localStorage.getItem('userEmail');
+    try {
+      // Call logout endpoint with correct port (8000)
+      await fetch(`http://localhost:8000/api/logout?email=${email}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }).then(response => {
+        if (response.ok) {
+          // Clear local storage
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('accountData');
+          
+          // Redirect to home page
+          navigate('/');
+        } else {
+          // If server responds with error, still logout locally
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('accountData');
+          navigate('/');
+        }
+      });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      // Even if server call fails, clear local storage and redirect
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('accountData');
+      navigate('/');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -72,10 +106,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             Settings
           </Link>
           <button
-            onClick={() => {
-              /* Add logout logic */
-            }}
-            className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 rounded-md"
+            onClick={handleLogout}
+            className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-900"
           >
             <LogOut className="mr-3 h-5 w-5" />
             Logout

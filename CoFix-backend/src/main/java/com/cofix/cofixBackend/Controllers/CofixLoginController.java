@@ -5,6 +5,7 @@ import com.cofix.cofixBackend.Models.MyPost;
 import com.cofix.cofixBackend.Models.MyReview;
 import com.cofix.cofixBackend.Models.MyUser;
 import com.cofix.cofixBackend.Models.CommunityIssue;
+import com.cofix.cofixBackend.Models.Location;
 import com.cofix.cofixBackend.Services.AuthService;
 import com.cofix.cofixBackend.Services.CofixService;
 import com.cofix.cofixBackend.Services.EmailSenderService;
@@ -163,7 +164,7 @@ public class CofixLoginController {
     }
 
     //@CrossOrigin
-    @GetMapping("/profile/issues")
+    @GetMapping("/profile/issues/all")
     public ResponseEntity<List<MyPost>> showAllIssues(String email) {
         List<MyPost> allPosts = new ArrayList<>();
         
@@ -182,11 +183,22 @@ public class CofixLoginController {
                 allPosts.addAll(schemes);
             }
 
-            log.debug("Get All posts for user: " + allPosts);
             return ResponseEntity.ok(allPosts);
         } catch (Exception e) {
             log.error("Error fetching issues: ", e);
-            return ResponseEntity.ok(new ArrayList<>()); // Return empty list on error
+            return ResponseEntity.ok(new ArrayList<>());
+        }
+    }
+
+    @GetMapping("/profile/issues/community")
+    public ResponseEntity<List<MyPost>> showAllCommunityIssues(String email) {
+        List<MyPost> issues = cofixService.getProfileIssues(email);
+        if (!issues.isEmpty()) {
+            issues.forEach(issue -> issue.setBenefitType(BenefitTypes.COMMUNITY_ISSUE));
+            log.debug("Get All issues for user: " + issues);
+            return new ResponseEntity<>(issues, HttpStatus.OK);
+        } else {
+            return ResponseEntity.ok(new ArrayList<>());
         }
     }
 
@@ -280,6 +292,7 @@ public class CofixLoginController {
     }
 
     @PostMapping("/issues/report")
+    @CrossOrigin(origins = "http://localhost:5173")
     public ResponseEntity<Map<String, String>> reportIssue(
         @RequestParam String title,
         @RequestParam String description,
@@ -371,7 +384,29 @@ public class CofixLoginController {
         if (post.getLocation() != null) {
             return post.getLocation();
         }
-        // Return default location if none exists
         return new Location(17.455598622434977, 78.66648576707394);
+    }
+
+    @GetMapping("/auth/status")
+    public ResponseEntity<Map<String, Object>> checkAuthStatus(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        Optional<MyUser> user = cofixService.getUsersRepo().findById(email);
+        
+        if (user.isPresent()) {
+            response.put("isAuthenticated", true);
+            response.put("user", user.get());
+            return ResponseEntity.ok(response);
+        }
+        
+        response.put("isAuthenticated", false);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@RequestParam String email) {
+        // Clear any server-side session if needed
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logged out successfully");
+        return ResponseEntity.ok(response);
     }
 }

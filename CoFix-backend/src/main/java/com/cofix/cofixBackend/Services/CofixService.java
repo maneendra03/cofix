@@ -47,17 +47,25 @@ public class CofixService implements Ordered {
     }
 
     @PostConstruct
-    public void initCofix(){
-
-//        if(postsRepo.findByEmailAndBenefitType("test@user.com",BenefitTypes.COMMUNITY_ISSUE).isEmpty()){
-//            log.info("Adding test@user Community Problem data");
-//            postsRepo.save(new MyPost("test@user.com",null, BenefitTypes.COMMUNITY_ISSUE,null,null,null,"electricity/streetlights","Fix power supply at a this location", new Location(2D,1D), "Need new street light", LocalDateTime.now()));
-//        }
-        if( postsRepo.findByEmailAndBenefitType("test@user.com",BenefitTypes.GOVERNMENT_SCHEME).isEmpty()){
-            log.info("Adding test@user Government Schemes data");
-            postsRepo.save(new MyPost("test@user.com",null,BenefitTypes.GOVERNMENT_SCHEME,"Rythu Bandhu","Rythu Bandhu description",null,null,null, null, "Rythu Bandhu Description",LocalDateTime.now()));
+    public void initCofix() {
+        try {
+            if (postsRepo.findByEmailAndBenefitType("test@user.com", BenefitTypes.GOVERNMENT_SCHEME).isEmpty()) {
+                log.info("Adding test@user Government Schemes data");
+                MyPost defaultPost = new MyPost();
+                defaultPost.setEmail("test@user.com");
+                defaultPost.setBenefitType(BenefitTypes.GOVERNMENT_SCHEME);
+                defaultPost.setSchemeName("Rythu Bandhu");
+                defaultPost.setDescription("Rythu Bandhu description");
+                defaultPost.setComment("Rythu Bandhu Description");
+                defaultPost.setCreateDate(LocalDateTime.now());
+                defaultPost.setLocation(new Location(17.455598622434977, 78.66648576707394));
+                
+                postsRepo.save(defaultPost);
+            }
+            log.info("======================= CofixService initialized =======================");
+        } catch (Exception e) {
+            log.error("Error initializing CofixService: ", e);
         }
-        log.info("======================= CofixService initialized =======================");
     }
 
     @Override

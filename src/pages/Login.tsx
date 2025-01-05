@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import AuthLayout from '../components/AuthLayout';
 import Input from '../components/Input';
@@ -8,6 +8,7 @@ import Button from '../components/Button';
 export default function Login() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const navigate = useNavigate();
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +34,9 @@ export default function Login() {
       
       if (response.ok) {
         localStorage.setItem('accountData', JSON.stringify(responseData));
-        window.location.href = '/home';
+        const params = new URLSearchParams(window.location.search);
+        const redirect = params.get('redirect') || '/home';
+        navigate(redirect);
       } else {
         alert(responseData.message || "Login failed");
       }
