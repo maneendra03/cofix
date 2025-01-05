@@ -11,33 +11,35 @@ export default function Login() {
 
    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add login logic here
     console.log('Form Submitted!');
     console.log('Email:', email);
     console.log('Password:', password);
-    const response = await fetch("http://localhost:8000/api/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        email: email,
-        password: password,
-      }),
-    });
-    console.log('Recieved response successfully', response.status);
-    localStorage.setItem('userEmail', email);
-    console.log('Email stored in localStorage');
-    if (response.ok) {
-      const responseData = await response.text();
-      console.log('Response ok: ', responseData);
-      alert('login successful');
-      localStorage.setItem('accountData', JSON.stringify(responseData));
-      window.location.href = 'home';
-    } else {
-      const responseData = await response.text();
-      console.log("Response not ok: ", responseData);
-      alert("Login failed");
+    try {
+      const response = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          email: email,
+          password: password,
+        }),
+      });
+      console.log('Received response successfully', response.status);
+      localStorage.setItem('userEmail', email);
+      
+      const responseData = await response.json();
+      console.log('Response:', responseData);
+      
+      if (response.ok) {
+        localStorage.setItem('accountData', JSON.stringify(responseData));
+        window.location.href = '/home';
+      } else {
+        alert(responseData.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during login");
     }
   };
 

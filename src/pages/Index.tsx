@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { MapPin, Users, Shield, ArrowRight, Github, Mail } from 'lucide-react';
@@ -52,10 +52,17 @@ const features = [
 ];
 
 export default function Index() {
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  const scrollToMap = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent any default navigation
+    mapRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="pt-16"> {/* Navbar offset */}
+      <div className="pt-16">
         {/* Hero Section */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -82,6 +89,15 @@ export default function Index() {
                         Get Started
                         <ArrowRight className="ml-2 h-5 w-5" />
                       </Link>
+                    </div>
+                    <div className="mt-3 sm:mt-0 sm:ml-3">
+                      <button
+                        onClick={scrollToMap}
+                        className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 md:py-4 md:text-lg md:px-10"
+                      >
+                        View Issues Map
+                        <MapPin className="ml-2 h-5 w-5" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -124,9 +140,21 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Map Section */}
-        <div className="h-[400px] w-full">
-          <IssueMap issues={mockIssues} />
+        {/* Map Section with heading */}
+        <div className="bg-white py-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+                Community Issues Map
+              </h2>
+              <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
+                View reported issues in your area
+              </p>
+            </div>
+            <div ref={mapRef} className="h-[500px] w-full rounded-lg overflow-hidden shadow-lg">
+              <IssueMap issues={mockIssues} />
+            </div>
+          </div>
         </div>
 
         {/* backend -> mockissues notices pass to issue map */}

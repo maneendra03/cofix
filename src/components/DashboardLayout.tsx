@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { MapPin, Home, AlertCircle, Bell, User, Settings, LogOut, Menu } from 'lucide-react';
+import { MapPin, Home, AlertCircle, Bell, User, Settings, LogOut, Menu, Map } from 'lucide-react';
 import Footer from './Footer';
 
 interface DashboardLayoutProps {
@@ -14,6 +14,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigation = [
     { name: 'Home', href: '/home', icon: Home },
     { name: 'Issues', href: '/issues', icon: AlertCircle },
+    { name: 'Maps', href: '/maps', icon: Map },
     { name: 'Notices', href: '/notices', icon: Bell },
     { name: 'Profile', href: '/profile', icon: User },
   ];

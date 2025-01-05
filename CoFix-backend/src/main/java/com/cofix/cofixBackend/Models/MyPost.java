@@ -58,6 +58,15 @@ public class MyPost{
     @Column(name = "create_date")
     LocalDateTime createDate;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
+    @Transient
+    private Location location;
+
     public MyPost(String email, BenefitTypes benefitType, String schemeName, String description, String image, String issueName, String activityDescription, Location location, String comment) {
         this.email = email;
         this.benefitType = benefitType;
@@ -68,5 +77,35 @@ public class MyPost{
         this.activityDescription = activityDescription;
         this.location = location;
         this.comment = comment;
+    }
+
+    public Location getLocation() {
+        if (this.latitude != null && this.longitude != null) {
+            return new Location(this.latitude, this.longitude);
+        }
+        return null;
+    }
+
+    public void setLocation(Location location) {
+        if (location != null) {
+            this.latitude = location.getLat();
+            this.longitude = location.getLng();
+        }
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

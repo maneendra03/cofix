@@ -1,26 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Upload, MapPin } from 'lucide-react';
 import Button from './Button';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface ReportIssueModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (issueData: any) => void;
+  initialData?: any;
 }
 
 function LocationMarker({ position, setPosition }: any) {
+  const map = useMap();
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (location) => {
+          const newPosition = {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude
+          };
+          setPosition(newPosition);
+          map.setView([newPosition.lat, newPosition.lng], map.getZoom());
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    }
+  }, []);
+
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
     },
   });
 
-  return position ? <Marker position={position} /> : null;
+  return (
+    <>
+      {position && (
+        <>
+          <Marker position={position} />
+          <CircleMarker 
+            center={[position.lat, position.lng]}
+            radius={20}
+            pathOptions={{
+              color: '#2563eb',
+              fillColor: '#3b82f6',
+              fillOpacity: 0.3
+            }}
+          />
+        </>
+      )}
+    </>
+  );
 }
 
-export default function ReportIssueModal({ isOpen, onClose, onSubmit }: ReportIssueModalProps) {
+export default function ReportIssueModal({ isOpen, onClose, onSubmit, initialData }: ReportIssueModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -30,6 +68,37 @@ export default function ReportIssueModal({ isOpen, onClose, onSubmit }: ReportIs
   });
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title,
+        description: initialData.message,
+        urgency: 'medium',
+        location: initialData.location || { lat: 0, lng: 0 },
+        photo: null,
+      });
+      if (initialData.location) {
+        setPosition(initialData.location);
+      }
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    if (isOpen && "geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (location) => {
+          setPosition({
+            lat: location.coords.latitude,
+            lng: location.coords.longitude
+          });
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    }
+  }, [isOpen]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,18 +112,46 @@ export default function ReportIssueModal({ isOpen, onClose, onSubmit }: ReportIs
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalData = {
-      ...formData,
-      location: position,
-      createdAt: new Date(),
-      status: 'pending',
-      type: 'community',
-      id: Math.random().toString(36).substr(2, 9),
-    };
-    onSubmit(finalData);
-    onClose();
+    
+    if (!position) {
+      alert('Please select a location on the map');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8000/api/profile/issues/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: localStorage.getItem('userEmail'),
+          benefitType: 'COMMUNITY_ISSUE',
+          issueName: formData.title,
+          description: formData.description,
+          location: {
+            lat: position.lat,
+            lng: position.lng
+          },
+          activityDescription: formData.description,
+          createDate: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        alert('Issue reported successfully');
+        onSubmit(formData);
+        onClose();
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to report issue');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to report issue');
+    }
   };
 
   if (!isOpen) return null;
@@ -111,7 +208,7 @@ export default function ReportIssueModal({ isOpen, onClose, onSubmit }: ReportIs
               <label className="block text-sm font-medium text-gray-700">Location</label>
               <div className="mt-1 h-[300px] rounded-md overflow-hidden">
                 <MapContainer
-                  center={[17.455598622434977, 78.66648576707394]}
+                  center={position || [17.455598622434977, 78.66648576707394]}
                   zoom={13}
                   style={{ height: '100%', width: '100%' }}
                 >
@@ -119,7 +216,11 @@ export default function ReportIssueModal({ isOpen, onClose, onSubmit }: ReportIs
                   <LocationMarker position={position} setPosition={setPosition} />
                 </MapContainer>
               </div>
-              <p className="mt-1 text-sm text-gray-500">Click on the map to set location</p>
+              <p className="mt-1 text-sm text-gray-500">
+                {position ? 
+                  "Click on the map to change location" : 
+                  "Getting your current location..."}
+              </p>
             </div>
 
             <div>

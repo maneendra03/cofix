@@ -1,39 +1,143 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Filter, MapPin, FileText } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
 import Button from '../components/Button';
 import type { Issue } from '../types';
 
-const mockSchemes: Issue[] = [
-  {
-    id: '1',
-    title: 'Housing Subsidy Implementation',
-    description: 'Issues with processing housing subsidy applications',
-    type: 'government',
-    status: 'pending',
-    urgency: 'high',
-    location: { lat: 37.7749, lng: -122.4194 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: '1'
-  },
-  {
-    id: '2',
-    title: 'Education Grant Distribution',
-    description: 'Delays in education grant disbursement',
-    type: 'government',
-    status: 'solved',
-    urgency: 'medium',
-    location: { lat: 37.7858, lng: -122.4064 },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    userId: '2'
-  }
-];
+// Add SchemeReportModal component within the same file
+function SchemeReportModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const [selectedScheme, setSelectedScheme] = useState('');
+  const [description, setDescription] = useState('');
+
+  const schemes = [
+    'Rythu Bandhu',
+    'Kalyana Lakshmi',
+    'Aasara pensions',
+    'Dalit Bandhu',
+    'Rythu Bima',
+    'Other Schemes'
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('http://localhost:8000/api/profile/schemes/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: localStorage.getItem('userEmail'),
+          benefitType: 'GOVERNMENT_SCHEME',
+          issueName: selectedScheme,
+          description: description,
+          status: 'pending',
+          createDate: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        onClose();
+        window.location.reload(); // Refresh to show new scheme
+      } else {
+        alert('Failed to report scheme issue');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to report scheme issue');
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">Report Scheme Issue</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Select Scheme
+            </label>
+            <select
+              value={selectedScheme}
+              onChange={(e) => setSelectedScheme(e.target.value)}
+              className="w-full p-2 border rounded-md"
+              required
+            >
+              <option value="">Select a scheme</option>
+              {schemes.map((scheme) => (
+                <option key={scheme} value={scheme}>
+                  {scheme}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full p-2 border rounded-md"
+              rows={4}
+              required
+              placeholder="Describe the issue with the scheme..."
+            />
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+            >
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 export default function GovernmentSchemes() {
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [schemes, setSchemes] = useState<Issue[]>([]);
+
+  useEffect(() => {
+    fetchSchemes();
+  }, []);
+
+  const fetchSchemes = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/issues?benefitType=GOVERNMENT_SCHEME');
+      if (response.ok) {
+        const data = await response.json();
+        setSchemes(data.map((scheme: any) => ({
+          id: scheme.postId.toString(),
+          title: scheme.issueName,
+          description: scheme.description,
+          type: 'government',
+          status: scheme.status || 'pending',
+          urgency: 'medium',
+          location: scheme.location || { lat: 0, lng: 0 },
+          createdAt: new Date(scheme.createDate),
+          updatedAt: new Date(scheme.createDate),
+          userId: scheme.email
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching schemes:', error);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -82,7 +186,7 @@ export default function GovernmentSchemes() {
         {/* Schemes List */}
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <ul className="divide-y divide-gray-200">
-            {mockSchemes.map((scheme, index) => (
+            {schemes.map((scheme, index) => (
               <motion.li
                 key={scheme.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -127,6 +231,12 @@ export default function GovernmentSchemes() {
             ))}
           </ul>
         </div>
+
+        {/* Scheme Report Modal */}
+        <SchemeReportModal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+        />
       </div>
     </DashboardLayout>
   );
