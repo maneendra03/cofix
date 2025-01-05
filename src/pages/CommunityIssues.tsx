@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Filter, MapPin, AlertCircle } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
@@ -40,7 +40,39 @@ export default function CommunityIssues() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [issues, setIssues] = useState<Issue[]>(mockIssues);
+  const [issues, setIssues] = useState<Issue[]>([]);
+
+  useEffect(() => {
+    fetchIssues();
+  }, []);
+
+  const fetchIssues = async () => {
+    try {
+      const userEmail = localStorage.getItem('userEmail');
+      if (!userEmail) {
+        console.error('No user email found');
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8000/api/profile/issues?email=${userEmail}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIssues(data.map((post: any) => ({
+          id: post.postId,
+          title: post.issueName,
+          description: post.description,
+          type: 'community',
+          status: post.status || 'pending',
+          location: post.location,
+          createdAt: new Date(post.createDate),
+          category: post.issueName?.split('/')[0] || selectedCategory,
+          userId: post.email
+        })));
+      }
+    } catch (error) {
+      console.error('Error fetching issues:', error);
+    }
+  };
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
@@ -48,12 +80,8 @@ export default function CommunityIssues() {
     setIsReportModalOpen(true);
   };
 
-  const handleSubmitIssue = (issueData: Issue) => {
-    const newIssue = {
-      ...issueData,
-      category: selectedCategory
-    };
-    setIssues([newIssue, ...issues]);
+  const handleSubmitIssue = async (issueData: Issue) => {
+    await fetchIssues(); // Refresh the list after new issue is added
   };
 
   return (

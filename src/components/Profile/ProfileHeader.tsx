@@ -2,12 +2,19 @@ import React from 'react';
 import { Camera } from 'lucide-react';
 
 export default function ProfileHeader() {
+  const [userEmail, setUserEmail] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const email = localStorage.getItem('userEmail');
+    setUserEmail(email);
+  }, []);
+
   return (
-    <div className="relative h-48  bg-gradient-to-r from-indigo-500 to-purple-600">
+    <div className="relative h-48 bg-gradient-to-r from-indigo-500 to-purple-600">
       <img
         src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1600&q=80"
         alt="Profile Background"
-        className="w-full h-full object-cover  opacity-50"
+        className="w-full h-full object-cover opacity-50"
       />
       <div className="absolute -bottom-16 left-8">
         <div className="relative">
@@ -16,7 +23,10 @@ export default function ProfileHeader() {
             alt="Profile"
             className="w-32 h-32 rounded-full border-4 border-white"
           />
-          <button className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50">
+          <button 
+            className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50"
+            title={userEmail || 'User'}
+          >
             <Camera className="w-5 h-5 text-gray-600" />
           </button>
         </div>

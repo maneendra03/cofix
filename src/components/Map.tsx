@@ -1,69 +1,64 @@
-import React from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { Icon } from 'leaflet';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMap, CircleMarker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import type { Issue } from '../types';
 
-// Fix for default marker icon
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-delete (Icon.Default.prototype as any)._getIconUrl;
-Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-});
-
-interface Location {
-  lat: number;
-  lng: number;
+function SetViewOnLocation({ coords }: { coords: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(coords, map.getZoom());
+  }, [coords]);
+  return null;
 }
 
-interface Issue {
-  id: string;
-  title: string;
-  description: string;
-  location: Location;
-  status: string;
-}
-
-interface IssueMapProps {
+interface MapProps {
   issues: Issue[];
 }
 
-export default function IssueMap({ issues }: IssueMapProps) {
-  const center: Location = issues[0]?.location || { lat: 37.7749, lng: -122.4194 }; // Default to San Francisco
+export default function IssueMap({ issues }: MapProps) {
+  const [currentLocation, setCurrentLocation] = useState<[number, number]>([17.455598622434977, 78.66648576707394]);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+        }
+      );
+    }
+  }, []);
 
   return (
     <MapContainer
-      center={[17.6051537, 78.4857042]}
+      center={currentLocation}
       zoom={13}
-      className="h-full w-full"
+      style={{ height: '100%', width: '100%' }}
     >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <SetViewOnLocation coords={currentLocation} />
+      
+      {/* Current location circle */}
+      <CircleMarker 
+        center={currentLocation}
+        radius={20}
+        pathOptions={{
+          color: '#2563eb',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.3
+        }}
       />
-      {issues.map((issue) => ( 
-        <Marker
-          key={issue.id}
-          position={[issue.location.lat, issue.location.lng]}
-        >
-          <Popup>
-            <div className="p-2">
-              <h3 className="font-semibold text-lg">{issue.title}</h3>
-              <p className="text-gray-600">{issue.description}</p>
-              <span className={`inline-block px-2 py-1 rounded-full text-xs mt-2 ${
-                issue.status === 'solved' 
-                  ? 'bg-green-100 text-green-800' 
-                  : 'bg-yellow-100 text-yellow-800'
-              }`}>
-                {issue.status}
-              </span>
-            </div>
-          </Popup>
-        </Marker>
+
+      {/* Issue markers */}
+      {issues.map((issue) => (
+        issue.location && (
+          <Marker
+            key={issue.id}
+            position={[issue.location.lat, issue.location.lng]}
+          />
+        )
       ))}
     </MapContainer>
   );

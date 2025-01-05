@@ -15,25 +15,14 @@ export default function Signup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Add signup logic here
-    // const form = e.target as HTMLFormElement;
-    // const formData = new FormData(form);
-
-    // // Using type assertions to ensure values are strings
-    // const name = formData.get("fullName") as string;
-    // const email = formData.get("email") as string;
-    // const password = formData.get("password") as string;
-    // const confirmPassword = formData.get("confirmPassword") as string;
-    // console.log('name=', name, 'pass:', password, 'email:', email);
-    // // Check for null values before making the request
-    // if (!name || !email || !password || !(password === confirmPassword)) {
-    //   alert("Please fill out all fields.");
-    //   return;
-    // }
     console.log('Form Submitted!');
-    console.log('Email:', formData.email);
-    console.log('Password:', formData.password);
-    alert('pause');
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    
     try {
       const response = await fetch("http://localhost:8000/api/signup", {
         method: "POST",
@@ -41,21 +30,23 @@ export default function Signup() {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          name: 'name',
-          email: 'email',
-          password: 'rahul',
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
         }),
       });
 
+      const responseData = await response.json();
+      
       if (response.ok) {
-        alert("Sign-up successful");
-        window.location.href = 'index';
+        alert(responseData.message);
+        window.location.href = '/login'; // Redirect to login page after successful signup
       } else {
-        alert("Sign-up failed");
+        alert(responseData.message || "Sign-up failed");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("Sign-up failed");
+      alert("An error occurred during sign-up");
     }
   };
 
@@ -64,7 +55,7 @@ export default function Signup() {
       title="Create an account"
       subtitle="Join our community to start reporting issues"
     >
-      <form className="mt-8 space-y-6" onSubmit={()=>handleSubmit}>
+      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
         <div className="space-y-4">
           <Input
             label="Full name"

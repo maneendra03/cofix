@@ -23,17 +23,68 @@ function InfoItem({ icon, label, value }: InfoItemProps) {
 export default function PersonalInfo() {
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [userInfo, setUserInfo] = React.useState<UserInfo>({
-    fullName: "Alexander Mitchell",
-    nickname: "Alex",
-    phone: "+1 (555) 123-4567",
-    country: "United States",
-    gender: "Male",
-    address: "123 Tech Street, San Francisco, CA 94105"
+    fullName: "",
+    nickname: "",
+    phone: "",
+    country: "",
+    gender: "",
+    address: ""
   });
 
-  const handleSave = (updatedInfo: UserInfo) => {
-    setUserInfo(updatedInfo);
-    // Here you would typically make an API call to update the user info
+  React.useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const userEmail = localStorage.getItem('userEmail');
+      const response = await fetch(`http://localhost:8000/api/profile?email=${userEmail}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserInfo({
+          fullName: data.name || "",
+          nickname: data.nickName || "",
+          phone: data.phoneNumber || "",
+          country: data.country || "",
+          gender: data.gender || "",
+          address: data.address || ""
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+    }
+  };
+
+  const handleSave = async (updatedInfo: UserInfo) => {
+    try {
+      const response = await fetch("http://localhost:8000/api/profile/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify({
+          email: localStorage.getItem('userEmail'),
+          name: updatedInfo.fullName,
+          nickName: updatedInfo.nickname,
+          phoneNumber: updatedInfo.phone,
+          country: updatedInfo.country,
+          gender: updatedInfo.gender,
+          address: updatedInfo.address,
+          createDate: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setUserInfo(updatedInfo);
+        await fetchUserInfo(); // Refresh data
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile');
+    }
   };
 
   return (

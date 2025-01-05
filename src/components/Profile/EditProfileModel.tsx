@@ -25,28 +25,34 @@ export default function EditProfileModal({ isOpen, onClose, userInfo, onSave }: 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log(formData.fullName);
-      console.log(formData.nickname);
-      const response = await fetch("http:localhost:8000/api/profile/update", {
-        method: "UPDATE",
+      const response = await fetch("http://localhost:8000/api/profile/update", {
+        method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
-        body: new URLSearchParams({
-          nickname: formData.nickname,
+        body: JSON.stringify({
+          email: localStorage.getItem('userEmail'),
+          name: formData.fullName,
+          nickName: formData.nickname,
           phoneNumber: formData.phone,
           country: formData.country,
           gender: formData.gender,
-          address: formData.address
+          address: formData.address,
+          createDate: new Date().toISOString()
         })
-      })
-      console.log(response);
+      });
+
       if (response.ok) {
         onSave(formData);
         onClose();
+      } else {
+        const error = await response.json();
+        alert(error.message || 'Failed to update profile');
       }
-    } catch (err) {
-      console.error(err.message);
+    } catch (err: any) {
+      console.error('Error updating profile:', err.message);
+      alert('Failed to update profile');
     }
   };
 

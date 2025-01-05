@@ -1,10 +1,11 @@
 package com.cofix.cofixBackend.Models;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(schema = "${cofix.schema.name}", name = "posts")
@@ -50,13 +51,24 @@ public class MyPost{
             @AttributeOverride(name = "lat", column = @Column(name = "latitude")),
             @AttributeOverride(name = "lng", column = @Column(name = "longitude"))
     })
-    Location location;
+    private Location location;
 
     @Column(name = "comment")
     String comment;
 
     @Column(name = "create_date")
     LocalDateTime createDate;
+
+    @Column(name = "images")
+    @ElementCollection
+    @CollectionTable(
+        name = "post_images",
+        joinColumns = {
+            @JoinColumn(name = "email"),
+            @JoinColumn(name = "post_id")
+        }
+    )
+    private List<String> images = new ArrayList<>();
 
     public MyPost(String email, BenefitTypes benefitType, String schemeName, String description, String image, String issueName, String activityDescription, Location location, String comment) {
         this.email = email;
@@ -68,5 +80,50 @@ public class MyPost{
         this.activityDescription = activityDescription;
         this.location = location;
         this.comment = comment;
+    }
+
+    public Location getLocation() {
+        return this.location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Double getLatitude() {
+        return location != null ? location.getLat() : null;
+    }
+
+    public void setLatitude(Double latitude) {
+        if (location == null) {
+            location = new Location();
+        }
+        location.setLat(latitude);
+    }
+
+    public Double getLongitude() {
+        return location != null ? location.getLng() : null;
+    }
+
+    public void setLongitude(Double longitude) {
+        if (location == null) {
+            location = new Location();
+        }
+        location.setLng(longitude);
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public void addImage(String image) {
+        if (this.images == null) {
+            this.images = new ArrayList<>();
+        }
+        this.images.add(image);
     }
 }
